@@ -73,7 +73,9 @@
     <Compile Include="Engines\CssLintEngine.cs" />
     <Compile Include="Composition\DirectoryCatalogWatcher.cs" />
     <Compile Include="Composition\MefComposer.cs" />
+    <Compile Include="Engines\UglifyEngine.cs" />
     <Compile Include="ErrorListProviderWrapper.cs" />
+    <Compile Include="Exports\MultiEngineResolver.cs" />
     <Compile Include="Exports\WebFileHandler.cs" />
     <Compile Include="FileAssociation.cs" />
     <Compile Include="IErrorListProvider.cs" />

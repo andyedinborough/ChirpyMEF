@@ -7,8 +7,8 @@ namespace Chirpy.Exports
 	using ChirpyInterface;
 	using Imports;
 
-	[Export(typeof (IEngineResolver))]
-	[Export(typeof (IInternalEngineResolver))]
+	//[Export(typeof (IEngineResolver))]
+	//[Export(typeof (IInternalEngineResolver))]
 	public class EngineResolver : IInternalEngineResolver, IEngineResolver
 	{
 		[ImportMany]

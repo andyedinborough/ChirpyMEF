@@ -24,11 +24,9 @@ namespace Chirpy
 				return;
 			}
 
-			var metadata = engines.First().Metadata;
-
-			Name = metadata.Name;
-			Category = metadata.Category;
-			Minifier = metadata.Minifier;
+      Name = string.Join("|", engines.Select(x => x.Metadata.Name).Distinct().OrderBy(x => x));
+      Category = string.Join("|", engines.Select(x => x.Metadata.Category).Distinct().OrderBy(x => x));
+      Minifier = engines.Any(x => x.Metadata.Minifier);
 
 			Internal = engines.Select(e => e.Metadata.Internal)
 				.Distinct()
@@ -37,38 +35,26 @@ namespace Chirpy
 
 		public List<string> GetDependencies(string contents, string filename)
 		{
-			return Execute(e => e.GetDependencies(contents, filename));
+			return Execute(e => e.GetDependencies(contents, filename))
+        .SelectMany(x=>x)
+        .Where(x=>x!=null)
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .ToList();
 		}
 
 		public List<EngineResult> Process(string contents, string filename)
 		{
-			return Execute(e => e.Process(contents, filename));
+      return Execute(e => e.Process(contents, filename)).SelectMany(x => x).ToList();
 		}
 
-		T Execute<T>(Func<IEngine, T> action)
-		{
-			Lazy<IEngine, IEngineMetadata> engine;
-			var success = false;
-			var result = default(T);
-
-			// try external first
-			if(HasExternalEngine())
-			{
-				engine = Engines.FirstOrDefault(e => !e.Metadata.Internal);
-
-				success = Try(action, engine, out result);
-			}
-
-			// try internal
-			if (!success && HasInternalEngine())
-			{
-				engine = Engines.FirstOrDefault(e => e.Metadata.Internal);
-
-				Try(action, engine, out result);
-			}
-
-			return result;
-		}
+    IEnumerable<T> Execute<T>(Func<IEngine, T> action) {
+      foreach (var engine in Engines) {
+        var result = default(T);
+        if (Try(action, engine, out result))
+          yield return result;
+        else yield break;
+      }
+    }
 
 		bool HasInternalEngine()
 		{
